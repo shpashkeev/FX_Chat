@@ -11,8 +11,7 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 
-
-<AnchorPane minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="300.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8.0.102">
+<AnchorPane minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="300.0" xmlns="http://javafx.com/javafx/8.0.102" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <BorderPane minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="300.0">
          <bottom>
@@ -23,7 +22,7 @@
                         <Insets bottom="2.0" left="5.0" right="5.0" top="2.0" />
                      </HBox.margin>
                   </TextField>
-                  <Button fx:id="sendButton" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="25.0" prefWidth="55.0" text="Send" textAlignment="RIGHT">
+                  <Button fx:id="sendButton" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#send" prefHeight="25.0" prefWidth="55.0" text="Send" textAlignment="RIGHT">
                      <HBox.margin>
                         <Insets bottom="5.0" top="5.0" />
                      </HBox.margin>
