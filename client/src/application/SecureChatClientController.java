@@ -7,6 +7,11 @@ package application;
 
 import java.net.InetSocketAddress;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
 import java.util.Optional;
 
 import io.netty.bootstrap.Bootstrap;
@@ -24,8 +29,12 @@ import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
 import io.netty.util.CharsetUtil;
 import javafx.application.Platform;
+import javafx.beans.InvalidationListener;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
@@ -35,6 +44,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
@@ -55,7 +65,7 @@ public class SecureChatClientController {
 	private MenuItem itemDisconnect;
 	
 	@FXML
-	private TextArea taMessages;
+	private ListView<String> lvMessages;
 	
 	@FXML
 	private TextField tfMessage;
@@ -65,9 +75,7 @@ public class SecureChatClientController {
 	
 	private SecureChatClient client;
 	
-	//private BooleanProperty connected = new SimpleBooleanProperty(false);
-	private StringProperty receivingMessageModel = new SimpleStringProperty("");
-	private StringProperty outDataModel = new SimpleStringProperty("");
+	private ObservableList<String> receivingMessageModel = FXCollections.observableArrayList(new ArrayList<String>());
 	
 	public void setClient(SecureChatClient client){
 		this.client = client;
@@ -77,7 +85,18 @@ public class SecureChatClientController {
 	@FXML
 	public void initialize() {
 
-		taMessages.textProperty().bind(receivingMessageModel);
+		receivingMessageModel.addListener(new ListChangeListener<String>() {
+	        @Override
+	        public void onChanged(javafx.collections.ListChangeListener.Change<? extends String> c) {
+	            System.out.println("Changed on " + c);
+	            if(c.next()){
+	                System.out.println(c.getFrom());
+	            }
+	            lvMessages.getItems().add(c.toString());
+	        }
+
+	    });
+		
 	}
 	
 	@FXML
@@ -118,8 +137,7 @@ public class SecureChatClientController {
 	@FXML
 	public void handleConnect() throws URISyntaxException {
 		
-		Boolean connect = false;
-		this.showConnectDialog(connect);
+		Boolean connect = this.showConnectDialog();
 		
 		if(connect){
 			String host = SecureChatClient.Host;
@@ -156,7 +174,7 @@ public class SecureChatClientController {
 						        p.addLast(new DelimiterBasedFrameDecoder(8192, Delimiters.lineDelimiter()));
 						        p.addLast(new StringDecoder());
 						        p.addLast(new StringEncoder());
-								p.addLast(new SecureChatClientHandler(outDataModel));
+								p.addLast(new SecureChatClientHandler(receivingMessageModel));
 							}
 						});
 					
@@ -193,7 +211,7 @@ public class SecureChatClientController {
 			
 			itemConnect.visibleProperty().bind(client.connected.not());
 			itemDisconnect.visibleProperty().bind(client.connected);
-			btnSend.disableProperty().bind(client.connected);
+			btnSend.disableProperty().bind(client.connected.not());
 			
 			new Thread(task).start();
 		}
@@ -271,7 +289,7 @@ public class SecureChatClientController {
 	
 	// Show Connect dialog
 	// returns allow/ not allow to connect
-	private void showConnectDialog(Boolean connect){
+	private boolean showConnectDialog(){
 		
 		// Create the custom dialog.
 		Dialog<Pair<String, String>> dialog = new Dialog<>();
@@ -330,6 +348,6 @@ public class SecureChatClientController {
 		});
 
 		// return flag to start connecting
-		connect = result.isPresent();
+		return result.isPresent();
 	}
 }
