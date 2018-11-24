@@ -11,18 +11,18 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 
-<AnchorPane minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="300.0" xmlns="http://javafx.com/javafx/8.0.102" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="300.0" xmlns="http://javafx.com/javafx/8.0.102" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.SecureChatClientController">
    <children>
       <BorderPane minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="300.0">
          <bottom>
             <HBox prefHeight="30.0" prefWidth="300.0" BorderPane.alignment="CENTER">
                <children>
-                  <TextField fx:id="messageInput" minHeight="-Infinity" minWidth="-Infinity" prefHeight="35.0" prefWidth="230.0">
+                  <TextField fx:id="tfMessage" minHeight="-Infinity" minWidth="-Infinity" prefHeight="35.0" prefWidth="230.0">
                      <HBox.margin>
                         <Insets bottom="2.0" left="5.0" right="5.0" top="2.0" />
                      </HBox.margin>
                   </TextField>
-                  <Button fx:id="sendButton" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#send" prefHeight="25.0" prefWidth="55.0" text="Send" textAlignment="RIGHT">
+                  <Button fx:id="btnSend" disable="true" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#send" prefHeight="25.0" prefWidth="55.0" text="Send" textAlignment="RIGHT">
                      <HBox.margin>
                         <Insets bottom="5.0" top="5.0" />
                      </HBox.margin>
@@ -35,19 +35,21 @@
               <menus>
                 <Menu mnemonicParsing="false" text="Menu">
                   <items>
-                    <MenuItem mnemonicParsing="false" text="Close" />
+                        <MenuItem fx:id="itemConnect" mnemonicParsing="false" onAction="#handleConnect" text="Connect" />
+                        <MenuItem fx:id="itemDisconnect" disable="true" mnemonicParsing="false" onAction="#handleDisconnect" text="Disconnect" />
+                    <MenuItem mnemonicParsing="false" onAction="#handleClose" text="Close" />
                   </items>
                 </Menu>
                 <Menu mnemonicParsing="false" text="Help">
                   <items>
-                    <MenuItem mnemonicParsing="false" text="About" />
+                    <MenuItem mnemonicParsing="false" onAction="#handleAbout" text="About" />
                   </items>
                 </Menu>
               </menus>
             </MenuBar>
          </top>
          <center>
-            <TextArea fx:id="messagesArea" cache="true" editable="false" minHeight="-Infinity" minWidth="-Infinity" prefHeight="200.0" prefWidth="255.0" BorderPane.alignment="CENTER">
+            <TextArea fx:id="taMessages" cache="true" editable="false" minHeight="-Infinity" minWidth="-Infinity" prefHeight="200.0" prefWidth="255.0" BorderPane.alignment="CENTER">
                <BorderPane.margin>
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                </BorderPane.margin>
