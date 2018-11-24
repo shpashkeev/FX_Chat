@@ -95,6 +95,6 @@ public class SecureChatClient extends Application {
             .trustManager(InsecureTrustManagerFactory.INSTANCE).build();
 		SecureChatClientController controller = fxmlLoader.getController();
 		controller.setClient(this);
-		//controller.handleConnect();
+		controller.handleConnect();
 	}
 }
