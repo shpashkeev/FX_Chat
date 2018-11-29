@@ -24,9 +24,9 @@ import javafx.application.Platform;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
@@ -38,6 +38,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.util.Pair;
 import javafx.scene.control.Alert.AlertType;
@@ -50,121 +52,130 @@ public class SecureChatClientController {
 
 	@FXML
 	private MenuItem itemConnect;
-	
+
 	@FXML
 	private MenuItem itemDisconnect;
-	
+
 	@FXML
 	private ListView<String> lvMessages;
-	
+
 	@FXML
 	private TextField tfMessage;
-	
+
 	@FXML
 	private Button btnSend;
-	
+
 	private SecureChatClient client;
-	
+
 	private ObservableList<String> receivingMessageModel = FXCollections.observableArrayList(new ArrayList<String>());
 
 	protected ListProperty<String> listProperty = new SimpleListProperty<>();
-	
-	public void setClient(SecureChatClient client){
+
+	public void setClient(SecureChatClient client) {
 		this.client = client;
 	}
-	
-	
+
 	@FXML
 	public void initialize() {
 		listProperty.set(receivingMessageModel);
-		lvMessages.itemsProperty().bind(listProperty);		
+		lvMessages.itemsProperty().bind(listProperty);
+
+		tfMessage.setOnKeyPressed(new EventHandler<KeyEvent>() {
+
+			@Override
+			public void handle(KeyEvent event) {
+				if (event.getCode().equals(KeyCode.ENTER)) {
+					try {
+						send();
+					} catch (Exception e) {
+						ShowErrorMessage(e);
+					}
+				}
+			}
+		});
 	}
-	
+
 	@FXML
 	public void send() throws Exception {
-		
+
 		final String toSend = tfMessage.getText();
-		
+
 		Task<Void> task = new Task<Void>() {
 
 			@Override
 			protected Void call() throws Exception {
 
-				ChannelFuture f = client.getChannel()
-						.writeAndFlush(Unpooled.copiedBuffer(toSend, CharsetUtil.UTF_8));
+				ChannelFuture f = client.getChannel().writeAndFlush(Unpooled.copiedBuffer(toSend, CharsetUtil.UTF_8));
 				f.sync();
 
 				if (!f.isSuccess()) {
-				    f.cause().printStackTrace();
-				} 
-				
+					f.cause().printStackTrace();
+				}
+
 				return null;
 			}
-				
+
 			@Override
 			protected void failed() {
-				
-				Throwable exc = getException();
-				Alert alert = new Alert(AlertType.ERROR);
-				alert.setTitle("Client");
-				alert.setHeaderText( exc.getClass().getName() );
-				alert.setContentText( exc.getMessage() );
-				alert.showAndWait();
-				
+
+				ShowErrorMessage(getException());
 				client.connected.set(false);
 			}
 
 		};
-		
+
 		new Thread(task).start();
 		tfMessage.clear();
 	}
-	
+
 	@FXML
 	public void handleConnect() throws URISyntaxException {
-		
+
 		Boolean connect = this.showConnectDialog();
-		
-		if(connect){
+
+		if (connect) {
 			String host = SecureChatClient.Host;
 			int port = Integer.parseInt(SecureChatClient.Port);
-			
+
 			this.client.setGroup(new NioEventLoopGroup());
-					  
+
 			Task<Channel> task = new Task<Channel>() {
 
 				@Override
 				protected Channel call() throws Exception {
-					
+
 					updateMessage("Bootstrapping");
 					updateProgress(0.1d, 1.0d);
-					
+
 					Bootstrap b = new Bootstrap();
-					b
-						.group(client.getGroup())
-						.channel(NioSocketChannel.class)
-						.remoteAddress( new InetSocketAddress(host, port) )
-						.handler( new ChannelInitializer<SocketChannel>() {
-							@Override
-							protected void initChannel(SocketChannel ch) throws Exception {
-								ChannelPipeline p = ch.pipeline();
+					b.group(client.getGroup()).channel(NioSocketChannel.class)
+							.remoteAddress(new InetSocketAddress(host, port))
+							.handler(new ChannelInitializer<SocketChannel>() {
+								@Override
+								protected void initChannel(SocketChannel ch) throws Exception {
+									ChannelPipeline p = ch.pipeline();
 
-						        // Add SSL handler first to encrypt and decrypt everything.
-						        // In this example, we use a bogus certificate in the server side
-						        // and accept any invalid certificates in the client side.
-						        // You will need something more complicated to identify both
-						        // and server in the real world.
-						        p.addLast(client.getSslCtx().newHandler(ch.alloc(), host, port));
+									// Add SSL handler first to encrypt and
+									// decrypt everything.
+									// In this example, we use a bogus
+									// certificate in the server side
+									// and accept any invalid certificates in
+									// the client side.
+									// You will need something more complicated
+									// to identify both
+									// and server in the real world.
+									p.addLast(client.getSslCtx().newHandler(ch.alloc(), host, port));
 
-						        // On top of the SSL handler, add the text line codec.
-								p.addLast(new SecureChatClientHandler(receivingMessageModel));
-							}
-						});
-					
+									// On top of the SSL handler, add the text
+									// line codec.
+									p.addLast(new SecureChatClientHandler(receivingMessageModel));
+								}
+							});
+
 					updateMessage("Connecting");
 					updateProgress(0.2d, 1.0d);
 
-					ChannelFuture f = b.connect();				
+					ChannelFuture f = b.connect();
 					f.sync();
 					Channel chn = f.channel();
 
@@ -173,33 +184,27 @@ public class SecureChatClientController {
 
 				@Override
 				protected void succeeded() {
-					
+
 					client.setChannel(getValue());
 					client.connected.set(true);
 				}
 
 				@Override
 				protected void failed() {
-					
-					Throwable exc = getException();
-					Alert alert = new Alert(AlertType.ERROR);
-					alert.setTitle("Client");
-					alert.setHeaderText( exc.getClass().getName() );
-					alert.setContentText( exc.getMessage() );
-					alert.showAndWait();
-					
+
+					ShowErrorMessage(getException());
 					client.connected.set(false);
 				}
 			};
-			
+
 			itemConnect.visibleProperty().bind(client.connected.not());
 			itemDisconnect.visibleProperty().bind(client.connected);
 			btnSend.disableProperty().bind(client.connected.not());
-			
+
 			new Thread(task).start();
 		}
 	}
-	
+
 	@FXML
 	public void handleDisconnect() {
 
@@ -230,28 +235,22 @@ public class SecureChatClientController {
 				@Override
 				protected void failed() {
 
+					ShowErrorMessage(getException());
 					client.connected.set(false);
-
-					Throwable t = getException();
-					Alert alert = new Alert(AlertType.ERROR);
-					alert.setTitle("Client");
-					alert.setHeaderText(t.getClass().getName());
-					alert.setContentText(t.getMessage());
-					alert.showAndWait();
 
 				}
 
 			};
-			
+
 			itemConnect.visibleProperty().bind(client.connected.not());
 			itemDisconnect.visibleProperty().bind(client.connected);
 			btnSend.disableProperty().bind(client.connected.not());
-			tfMessage.disableProperty().bind( client.connected.not() );
+			tfMessage.disableProperty().bind(client.connected.not());
 
 			new Thread(task).start();
 		}
 	}
-	
+
 	// Menu -> Close
 	@FXML
 	private void handleClose() throws Exception {
@@ -259,7 +258,7 @@ public class SecureChatClientController {
 		client.stop();
 		Platform.exit();
 	}
-	
+
 	// Help -> About
 	@FXML
 	private void handleAbout() {
@@ -269,11 +268,11 @@ public class SecureChatClientController {
 		alert.setContentText("");
 		alert.showAndWait();
 	}
-	
+
 	// Show Connect dialog
 	// returns allow/ not allow to connect
-	private boolean showConnectDialog(){
-		
+	private boolean showConnectDialog() {
+
 		// Create the custom dialog.
 		Dialog<Pair<String, String>> dialog = new Dialog<>();
 		dialog.setTitle("Connect to Server");
@@ -321,7 +320,7 @@ public class SecureChatClientController {
 			}
 			return null;
 		});
-		
+
 		Optional<Pair<String, String>> result = dialog.showAndWait();
 
 		// update client's host and port
@@ -332,5 +331,13 @@ public class SecureChatClientController {
 
 		// return flag to start connecting
 		return result.isPresent();
+	}
+
+	private void ShowErrorMessage(Throwable exc) {
+		Alert alert = new Alert(AlertType.ERROR);
+		alert.setTitle("Client");
+		alert.setHeaderText(exc.getClass().getName());
+		alert.setContentText(exc.getMessage());
+		alert.showAndWait();
 	}
 }
