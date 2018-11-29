@@ -22,7 +22,6 @@ public class SecureChatServerHandler extends SimpleChannelInboundHandler<String>
         // list so the channel received the messages from others.
         ctx.pipeline().get(SslHandler.class).handshakeFuture().addListener(
                 new GenericFutureListener<Future<Channel>>() {
-                    @Override
                     public void operationComplete(Future<Channel> future) throws Exception {
                         ctx.writeAndFlush(
                                 "Welcome to " + InetAddress.getLocalHost().getHostName() + " secure chat service!\n");
