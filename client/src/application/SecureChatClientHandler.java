@@ -10,14 +10,13 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.util.CharsetUtil;
 import javafx.application.Platform;
-import javafx.beans.property.StringProperty;
 import javafx.collections.ObservableList;
 
 /**
  * Handles a client-side channel.
  * ByteBuf used for increase performance.
  */
-public class SecureChatClientHandler extends SimpleChannelInboundHandler<String> {
+public class SecureChatClientHandler extends SimpleChannelInboundHandler<ByteBuf> {
 
 	private final ObservableList<String> receivingMessageModel;
 	
@@ -26,9 +25,9 @@ public class SecureChatClientHandler extends SimpleChannelInboundHandler<String>
 	}
 	
 	@Override
-	protected void channelRead0(ChannelHandlerContext arg0, String in) throws Exception {
-		//final String cm = in.toString(CharsetUtil.UTF_8);
-		Platform.runLater( () -> receivingMessageModel.add(in));
+	protected void channelRead0(ChannelHandlerContext arg0, ByteBuf in) throws Exception {
+		final String cm = in.toString(CharsetUtil.UTF_8);
+		Platform.runLater( () -> receivingMessageModel.add(cm));
 	}
 	
     @Override

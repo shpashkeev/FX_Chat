@@ -2,7 +2,7 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="F:/Programs/Java/netty-4.1.16.Final/jar/all-in-one/netty-all-4.1.16.Final.jar"/>
 	<classpathentry kind="con" path="org.eclipse.fx.ide.jdt.core.JAVAFX_CONTAINER"/>
+	<classpathentry kind="lib" path="F:/Programs/Java/netty-4.1.32.Final/netty-4.1.32.Final/jar/all-in-one/netty-all-4.1.32.Final.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
