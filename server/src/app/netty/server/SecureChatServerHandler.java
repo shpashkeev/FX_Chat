@@ -32,12 +32,6 @@ public class SecureChatServerHandler extends SimpleChannelInboundHandler<ByteBuf
 	}
 
 	@Override
-	public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
-		System.out.println("[READ_COMPLETE]");
-		ctx.flush();
-	}
-
-	@Override
 	public void channelActive(final ChannelHandlerContext ctx) {
 		// Once session is secured, send a greeting and register the channel to
 		// the global channel
@@ -73,10 +67,10 @@ public class SecureChatServerHandler extends SimpleChannelInboundHandler<ByteBuf
 		for (Channel c : channels) {
 
 			if (c != ctx.channel()) {
-				c.write(Unpooled.copiedBuffer("[" + ctx.channel().remoteAddress() + "] " + msg + '\n',
+				c.writeAndFlush(Unpooled.copiedBuffer("[" + ctx.channel().remoteAddress() + "] " + msg + '\n',
 						CharsetUtil.UTF_8));
 			} else {
-				c.write(Unpooled.copiedBuffer("[you] " + msg + '\n', CharsetUtil.UTF_8));
+				c.writeAndFlush(Unpooled.copiedBuffer("[you] " + msg + '\n', CharsetUtil.UTF_8));
 			}
 		}
 
