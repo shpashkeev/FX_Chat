@@ -19,8 +19,6 @@ import io.netty.channel.ChannelPipeline;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.handler.codec.string.StringDecoder;
-import io.netty.handler.codec.string.StringEncoder;
 import io.netty.util.CharsetUtil;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -162,8 +160,6 @@ public class SecureChatClientController {
 						        p.addLast(client.getSslCtx().newHandler(ch.alloc(), host, port));
 
 						        // On top of the SSL handler, add the text line codec.
-						        p.addLast(new StringDecoder());
-						        p.addLast(new StringEncoder());
 								p.addLast(new SecureChatClientHandler(receivingMessageModel));
 							}
 						});
