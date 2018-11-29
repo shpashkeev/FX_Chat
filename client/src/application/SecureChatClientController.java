@@ -21,6 +21,8 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.CharsetUtil;
 import javafx.application.Platform;
+import javafx.beans.property.ListProperty;
+import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -64,6 +66,8 @@ public class SecureChatClientController {
 	private SecureChatClient client;
 	
 	private ObservableList<String> receivingMessageModel = FXCollections.observableArrayList(new ArrayList<String>());
+
+	protected ListProperty<String> listProperty = new SimpleListProperty<>();
 	
 	public void setClient(SecureChatClient client){
 		this.client = client;
@@ -72,15 +76,8 @@ public class SecureChatClientController {
 	
 	@FXML
 	public void initialize() {
-
-		receivingMessageModel.addListener(new ListChangeListener<String>() {
-	        @Override
-	        public void onChanged(javafx.collections.ListChangeListener.Change<? extends String> c) {
-	            lvMessages.getItems().add(c.toString());
-	        }
-
-	    });
-		
+		listProperty.set(receivingMessageModel);
+		lvMessages.itemsProperty().bind(listProperty);		
 	}
 	
 	@FXML
