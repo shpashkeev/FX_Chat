@@ -27,10 +27,10 @@ import javafx.stage.Stage;
  */
 public class SecureChatClient extends Application {
 
-	// constants
+	// default connection values
 	public static String Host = "localhost";
 	public static String Port = "8007";
-	
+
 	private Stage primaryStage;
 
 	public Stage getPrimaryStage() {
@@ -39,13 +39,13 @@ public class SecureChatClient extends Application {
 
 	// netty entities
 	private SslContext sslCtx;
-	
+
 	public SslContext getSslCtx() {
 		return sslCtx;
 	}
-	
+
 	private Channel channel;
-	
+
 	public Channel getChannel() {
 		return channel;
 	}
@@ -55,7 +55,7 @@ public class SecureChatClient extends Application {
 	}
 
 	private EventLoopGroup group;
-	
+
 	public EventLoopGroup getGroup() {
 		return group;
 	}
@@ -63,36 +63,35 @@ public class SecureChatClient extends Application {
 	public void setGroup(EventLoopGroup group) {
 		this.group = group;
 	}
-	
+
 	public BooleanProperty connected = new SimpleBooleanProperty(false);
-	
+
 	public static void main(String[] args) throws Exception {
 		launch(args);
 	}
-	
+
 	public void start(Stage primaryStage) throws Exception {
-		
+
 		FXMLLoader fxmlLoader = new FXMLLoader(SecureChatClient.class.getResource("/ChatClient.fxml"));
-		
+
 		Parent p = fxmlLoader.load();
-		
+
 		Scene scene = new Scene(p);
-		
+
 		this.setClient(fxmlLoader);
 
-		primaryStage.setScene( scene );
+		primaryStage.setScene(scene);
 		primaryStage.setTitle("Secure Chat Client");
 		primaryStage.setWidth(320);
 		primaryStage.setHeight(568);
-		
+
 		primaryStage.show();
 	}
-	
-	private void setClient(FXMLLoader fxmlLoader) throws SSLException, URISyntaxException{
-        
+
+	private void setClient(FXMLLoader fxmlLoader) throws SSLException, URISyntaxException {
+
 		// Configure SSL.
-        this.sslCtx = SslContextBuilder.forClient()
-            .trustManager(InsecureTrustManagerFactory.INSTANCE).build();
+		this.sslCtx = SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE).build();
 		SecureChatClientController controller = fxmlLoader.getController();
 		controller.setClient(this);
 		controller.handleConnect();

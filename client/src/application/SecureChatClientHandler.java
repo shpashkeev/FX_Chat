@@ -13,26 +13,26 @@ import javafx.application.Platform;
 import javafx.collections.ObservableList;
 
 /**
- * Handles a client-side channel.
- * ByteBuf used for increase performance.
+ * Handles a client-side channel. ByteBuf used for increase performance.
  */
 public class SecureChatClientHandler extends SimpleChannelInboundHandler<ByteBuf> {
 
-	private final ObservableList<String> receivingMessageModel;
-	
-	public SecureChatClientHandler(ObservableList<String> receivingMessageModel) {
-		this.receivingMessageModel = receivingMessageModel;
+	// binds ui messages displaying with received messages from server
+	private final ObservableList<String> receivingMessagesModel;
+
+	public SecureChatClientHandler(ObservableList<String> receivingMessagesModel) {
+		this.receivingMessagesModel = receivingMessagesModel;
 	}
-	
+
 	@Override
 	protected void channelRead0(ChannelHandlerContext arg0, ByteBuf in) throws Exception {
 		final String cm = in.toString(CharsetUtil.UTF_8);
-		Platform.runLater( () -> receivingMessageModel.add(cm));
+		Platform.runLater(() -> receivingMessagesModel.add(cm));
 	}
-	
-    @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        cause.printStackTrace();
-        ctx.close();
-    }
+
+	@Override
+	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+		cause.printStackTrace();
+		ctx.close();
+	}
 }

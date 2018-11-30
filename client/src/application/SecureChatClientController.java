@@ -67,7 +67,7 @@ public class SecureChatClientController {
 
 	private SecureChatClient client;
 
-	private ObservableList<String> receivingMessageModel = FXCollections.observableArrayList(new ArrayList<String>());
+	private ObservableList<String> receivingMessagesModel = FXCollections.observableArrayList(new ArrayList<String>());
 
 	protected ListProperty<String> listProperty = new SimpleListProperty<>();
 
@@ -77,7 +77,7 @@ public class SecureChatClientController {
 
 	@FXML
 	public void initialize() {
-		listProperty.set(receivingMessageModel);
+		listProperty.set(receivingMessagesModel);
 		lvMessages.itemsProperty().bind(listProperty);
 
 		tfMessage.setOnKeyPressed(new EventHandler<KeyEvent>() {
@@ -108,10 +108,6 @@ public class SecureChatClientController {
 				ChannelFuture f = client.getChannel().writeAndFlush(Unpooled.copiedBuffer(toSend, CharsetUtil.UTF_8));
 				f.sync();
 
-				if (!f.isSuccess()) {
-					f.cause().printStackTrace();
-				}
-
 				return null;
 			}
 
@@ -132,6 +128,10 @@ public class SecureChatClientController {
 	public void handleConnect() throws URISyntaxException {
 
 		Boolean connect = this.showConnectDialog();
+
+		itemConnect.visibleProperty().bind(client.connected.not());
+		itemDisconnect.visibleProperty().bind(client.connected);
+		btnSend.disableProperty().bind(client.connected.not());
 
 		if (connect) {
 			String host = SecureChatClient.Host;
@@ -166,9 +166,7 @@ public class SecureChatClientController {
 									// and server in the real world.
 									p.addLast(client.getSslCtx().newHandler(ch.alloc(), host, port));
 
-									// On top of the SSL handler, add the text
-									// line codec.
-									p.addLast(new SecureChatClientHandler(receivingMessageModel));
+									p.addLast(new SecureChatClientHandler(receivingMessagesModel));
 								}
 							});
 
@@ -196,10 +194,6 @@ public class SecureChatClientController {
 					client.connected.set(false);
 				}
 			};
-
-			itemConnect.visibleProperty().bind(client.connected.not());
-			itemDisconnect.visibleProperty().bind(client.connected);
-			btnSend.disableProperty().bind(client.connected.not());
 
 			new Thread(task).start();
 		}
@@ -237,15 +231,9 @@ public class SecureChatClientController {
 
 					ShowErrorMessage(getException());
 					client.connected.set(false);
-
 				}
 
 			};
-
-			itemConnect.visibleProperty().bind(client.connected.not());
-			itemDisconnect.visibleProperty().bind(client.connected);
-			btnSend.disableProperty().bind(client.connected.not());
-			tfMessage.disableProperty().bind(client.connected.not());
 
 			new Thread(task).start();
 		}
@@ -264,8 +252,8 @@ public class SecureChatClientController {
 	private void handleAbout() {
 		Alert alert = new Alert(AlertType.INFORMATION);
 		alert.setTitle("About");
-		alert.setHeaderText("");
-		alert.setContentText("");
+		alert.setHeaderText("Secure Chat Client v 0.0.1");
+		alert.setContentText("@shpashkeev\n@YuliaMironovich\n\n2018");
 		alert.showAndWait();
 	}
 
@@ -336,7 +324,7 @@ public class SecureChatClientController {
 	private void ShowErrorMessage(Throwable exc) {
 		Alert alert = new Alert(AlertType.ERROR);
 		alert.setTitle("Client");
-		alert.setHeaderText(exc.getClass().getName());
+		alert.setHeaderText(exc.getClass().getCanonicalName());
 		alert.setContentText(exc.getMessage());
 		alert.showAndWait();
 	}
