@@ -82,8 +82,10 @@ public class SecureChatClient extends Application {
 
 		primaryStage.setScene(scene);
 		primaryStage.setTitle("Secure Chat Client");
-		primaryStage.setWidth(320);
-		primaryStage.setHeight(568);
+		primaryStage.setWidth(scene.getWidth());
+		primaryStage.setHeight(scene.getHeight());
+		primaryStage.setMinWidth(scene.getWidth());
+		primaryStage.setMinHeight(scene.getHeight());
 
 		primaryStage.show();
 	}
