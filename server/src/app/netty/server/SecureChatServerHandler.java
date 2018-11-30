@@ -22,13 +22,35 @@ public class SecureChatServerHandler extends SimpleChannelInboundHandler<ByteBuf
 	@Override
 	public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
 		Channel incoming = ctx.channel();
+
+		// for server
 		System.out.println("[CONNECTED]" + incoming.remoteAddress());
+
+		// for clients
+		for (Channel c : channels) {
+
+			if (c != ctx.channel()) {
+				c.writeAndFlush(Unpooled.copiedBuffer("[" + ctx.channel().remoteAddress() + "] CONNECTED\n",
+						CharsetUtil.UTF_8));
+			}
+		}
 	}
 
 	@Override
 	public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
 		Channel incoming = ctx.channel();
+
+		// for server
 		System.out.println("[DISCONNECTED]" + incoming.remoteAddress());
+
+		// for clients
+		for (Channel c : channels) {
+
+			if (c != ctx.channel()) {
+				c.writeAndFlush(Unpooled.copiedBuffer("[" + ctx.channel().remoteAddress() + "] DISCONNECTED\n",
+						CharsetUtil.UTF_8));
+			}
+		}
 	}
 
 	@Override
@@ -44,8 +66,8 @@ public class SecureChatServerHandler extends SimpleChannelInboundHandler<ByteBuf
 								CharsetUtil.UTF_8));
 						ctx.writeAndFlush(
 								Unpooled.copiedBuffer(
-										"Your session is protected by " + ctx.pipeline().get(SslHandler.class).engine()
-												.getSession().getCipherSuite() + " cipher suite.\n",
+										"Your session is protected by\n" + ctx.pipeline().get(SslHandler.class).engine()
+												.getSession().getCipherSuite() + "\ncipher suite.\n",
 										CharsetUtil.UTF_8));
 
 						channels.add(ctx.channel());
