@@ -24,3 +24,6 @@ Model - Client (https://github.com/shpashkeev/FX_Chat/blob/master/client/src/app
 View - FXML file (https://github.com/shpashkeev/FX_Chat/blob/master/client/src/ChatClient.fxml)
 Controller - class Controller for fxml file (https://github.com/shpashkeev/FX_Chat/blob/master/client/src/application/SecureChatClientController.java)
 
+Demo of simple functionality:
+
+![](Demo.gif)
